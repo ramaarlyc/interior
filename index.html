@@ -112,6 +112,231 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .location-option:hover,.location-option:focus{background:#eaf3f9}
 .location-option small{display:block;color:#62778a;font-size:12px}
 .location-empty{padding:14px;color:#607487;font-size:13px}
+
+/* =========================================================
+   MOBILE UX PATCH v2 — visual/navigation only
+   No database, data model, IDs, or calculation logic changed.
+   ========================================================= */
+@media (max-width: 760px) {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-size: 15px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    padding-bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: calc(72px + env(safe-area-inset-bottom));
+    padding: 6px 7px calc(6px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 50;
+    border-top: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 -5px 22px rgba(13,35,55,.18);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .brand, .sidefoot { display: none !important; }
+  .nav {
+    flex: 0 0 78px;
+    width: 78px;
+    min-width: 78px;
+    min-height: 58px;
+    height: 100%;
+    margin: 0;
+    padding: 5px 3px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .nav span:first-child {
+    display: block;
+    width: auto;
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .nav .txt {
+    display: block !important;
+    font-size: 10px;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nav.active { background: #2b5677; }
+
+  main {
+    width: 100%;
+    max-width: none;
+    margin: 0 !important;
+    padding: 15px 12px 24px !important;
+  }
+  header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    gap: 9px;
+  }
+  header > div:first-child { min-width: 0; }
+  .eyebrow { font-size: 10px; }
+  h1 { font-size: 24px; line-height: 1.2; }
+  h2 { font-size: 20px; line-height: 1.3; }
+  h3 { font-size: 16px; }
+  header .inline { flex-wrap: wrap; }
+  .status { font-size: 10px; padding: 7px 9px; }
+
+  .hero { padding: 20px 17px; border-radius: 14px; }
+  .hero h2 { font-size: 23px; }
+  .hero p { font-size: 14px; line-height: 1.6; }
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin: 12px 0;
+  }
+  .stat { min-width: 0; padding: 12px; border-radius: 11px; }
+  .stat span, .stat small { font-size: 11px; }
+  .stat b { font-size: 19px; line-height: 1.25; overflow-wrap: anywhere; }
+
+  .panel { min-width: 0; padding: 14px; margin-bottom: 11px; border-radius: 12px; }
+  .grid2, .grid3, .formgrid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px;
+  }
+  .wide { grid-column: auto !important; }
+  .toolbar, .panelhead { align-items: stretch; flex-direction: column; gap: 10px; }
+  .toolbar > .btn, .panelhead > .btn { width: 100%; }
+  .inline { gap: 8px; flex-wrap: wrap; }
+  .inline > .btn { flex: 1 1 auto; }
+  .btn { min-height: 44px; padding: 11px 13px; font-size: 13px; border-radius: 10px; }
+  .btn.small { min-height: 42px; }
+  label { font-size: 13px; }
+  input, select, textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+  textarea { min-height: 100px; }
+  .filters { flex-direction: column; gap: 9px; }
+  .filters input, .filters select { max-width: none; min-height: 48px; }
+
+  .tablewrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid #e6edf2;
+    border-radius: 9px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  table { min-width: 680px; font-size: 12px; }
+  th { font-size: 11px; padding: 11px 10px; }
+  td { padding: 11px 10px; }
+
+  .listcard { align-items: flex-start; flex-direction: column; gap: 10px; padding: 14px; }
+  .listcard > div { width: 100%; min-width: 0; }
+  .listcard .actions { width: 100%; }
+  .listcard .actions .btn { flex: 1 1 auto; }
+  .breadcrumb { flex-wrap: wrap; font-size: 12px; margin-bottom: 11px; }
+  .totalbar { align-items: flex-start; gap: 8px; padding: 13px; }
+  .totalbar b { font-size: 20px; text-align: right; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
+  .tab { flex: 0 0 auto; }
+
+  .component { padding: 12px; margin: 10px 0; border-radius: 11px; }
+  .component-head { align-items: flex-start; flex-wrap: wrap; }
+  .component-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 9px; }
+  .component-grid label:first-child { grid-column: 1 / -1; }
+  .component-grid input, .component-grid select { min-height: 46px; padding: 10px; font-size: 15px; }
+  #quickPresetsContainer { padding: 11px !important; }
+  #quickPresetsBar { gap: 7px !important; }
+
+  /* Critical fix: dialog sits ABOVE bottom navigation. */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100 !important;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+  }
+  .modalbox {
+    position: relative;
+    z-index: 101;
+    width: 100%;
+    max-width: none;
+    max-height: 88vh;
+    max-height: 88dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 18px 15px calc(18px + env(safe-area-inset-bottom));
+    border-radius: 18px 18px 0 0;
+  }
+  .modalhead {
+    position: sticky;
+    top: -18px;
+    z-index: 2;
+    padding: 10px 0;
+    margin: -8px 0 14px;
+    background: #fff;
+  }
+  .modalactions {
+    position: sticky;
+    bottom: -18px;
+    z-index: 2;
+    display: flex;
+    gap: 8px;
+    padding: 12px 0 calc(8px + env(safe-area-inset-bottom));
+    margin: 14px 0 -18px;
+    background: #fff;
+  }
+  .modalactions .btn { flex: 1 1 0; }
+  .x { width: 42px; height: 42px; flex: 0 0 42px; }
+  .location-suggestions {
+    position: relative;
+    z-index: 5;
+    max-height: 190px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .location-option { min-height: 48px; font-size: 15px; }
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    text-align: center;
+    z-index: 120;
+  }
+  .notice { font-size: 13px; padding: 11px 12px; }
+}
+
+@media (max-width: 390px) {
+  main { padding-left: 10px !important; padding-right: 10px !important; }
+  .nav { flex-basis: 72px; min-width: 72px; width: 72px; }
+  .stats { gap: 7px; }
+  .stat { padding: 10px; }
+  .stat b { font-size: 17px; }
+  .component-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .component-grid label:first-child { grid-column: auto; }
+}
+
 </style></head><body>
 <aside class="sidebar"><div class="brand"><div class="logo">L</div><div><b>LUKMAN INTERIOR</b></div></div>
 <button class="nav active" data-page="dashboard"><span>▦</span><span class="txt">Dashboard</span></button>
@@ -120,6 +345,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 
 
+<button class="nav" data-page="materials"><span>▤</span><span class="txt">Master Material</span></button>
+<button class="nav" data-page="works"><span>▣</span><span class="txt">Master Pekerjaan</span></button>
+<button class="nav" data-page="resources"><span>⚒</span><span class="txt">Tenaga & Peralatan</span></button>
+<button class="nav" data-page="prices"><span>＄</span><span class="txt">Harga Manual</span></button>
 <button class="nav" data-page="reports"><span>▧</span><span class="txt">Laporan & Backup</span></button>
 <div class="sidefoot">OFFLINE · SINGLE USER<br>Data tersimpan di browser ini.</div></aside>
 <main><header><div><div class="eyebrow">CONSTRUCTION COST MANAGEMENT</div><h1 id="pageTitle">Dashboard</h1></div><div class="inline"><span class="status">● OFFLINE READY</span><button class="btn soft no-print" onclick="backup()">Backup</button></div></header>
@@ -304,7 +533,8 @@ function setupOfflineLocation(prefix,initial={}){
  cityInput.addEventListener('input',()=>{
   const q=regionNorm(cityInput.value.trim());el('Province').value='';el('City').value='';el('RegencyId').value='';
   if(!q){cityList.classList.remove('show');return}
-  const matches=REGION_DB.r.filter(x=>regionNorm(x[2]).includes(q)).map(x=>({id:x[0],provinceId:x[1],name:x[2],province:REGION_MAP.provinces.get(x[1])||''})).sort((a,b)=>a.name.localeCompare(b.name,'id')||a.province.localeCompare(b.province,'id'));
+  const searchQ=q.includes('tanjung selor')?'bulungan':q;
+  const matches=REGION_DB.r.filter(x=>regionNorm(x[2]).includes(searchQ)).map(x=>({id:x[0],provinceId:x[1],name:x[2],province:REGION_MAP.provinces.get(x[1])||''})).sort((a,b)=>a.name.localeCompare(b.name,'id')||a.province.localeCompare(b.province,'id'));
   show(cityList,matches,selectCity,x=>({main:x.name,sub:x.province}));
  });
  districtInput.disabled=true;villageInput.disabled=true;
