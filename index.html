@@ -186,7 +186,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="modal" id="priceModal"><form class="modalbox" id="priceForm"><div class="modalhead"><h3>Input harga manual</h3><button type="button" class="x" onclick="closeModal('priceModal')">×</button></div><div class="formgrid"><label>Jenis<select id="priceType" onchange="fillPriceItemOptions()"><option>Material</option><option>Tenaga Kerja</option><option>Peralatan</option><option>Jasa</option></select></label><label>Item<select id="priceItem"></select></label><label>Provinsi<input id="priceProvince" required></label><label>Kabupaten/kota<input id="priceCity" required></label><label>Satuan<input id="priceUnit" required></label><label>Harga satuan<input id="priceValue" type="number" min="0" required></label><label>Tanggal<input id="priceDate" type="date" required></label><label>Sumber / supplier<input id="priceSource"></label></div><div class="modalactions"><button type="button" class="btn" onclick="closeModal('priceModal')">Batal</button><button class="btn primary">Simpan harga</button></div></form></div>
 
 <div class="modal" id="customerPrintModal"><form class="modalbox" id="customerPrintForm"><div class="modalhead"><h3>Siapkan PDF penawaran (customer)</h3><button type="button" class="x" onclick="closeModal('customerPrintModal')">×</button></div>
-<div class="notice">Pilih jenis dokumen. Semua dokumen mengambil data langsung dari RAB dan AHSP. Harga modal komponen, supplier, overhead, dan profit tidak ditampilkan pada dokumen eksternal.</div>
+<div class="notice">Pilih jenis dokumen. Dokumen "RAB Detail" dan "Rekap Kebutuhan" menampilkan rincian koefisien, harga satuan material/jasa/upah, serta total biaya subtotal per komponen.</div>
 <div class="formgrid">
 <label class="wide">Jenis dokumen PDF<select id="cpDocType"><option value="offer">Penawaran Harga — ringkas untuk customer</option><option value="detail">RAB Detail — pekerjaan, material, tenaga, alat, dan jasa</option><option value="recap">Rekap Kebutuhan — total kebutuhan seluruh item</option></select></label>
 <label class="wide">Nama perusahaan / penyedia<input id="cpCompany" placeholder="Nama perusahaan atau kontraktor"></label>
@@ -492,8 +492,12 @@ function cpComponentData(line){
   const name=item?.name||c.name||'Item belum dipilih';
   const spec=item?.spec||c.spec||'';
   const unit=item?.unit||c.unit||'-';
-  const qty=Number(line.volume||0)*Number(c.coeff||0)*(1+Number(c.waste||0)/100);
-  return {type:c.type||'Lainnya',name,spec,unit,qty,coeff:Number(c.coeff||0),waste:Number(c.waste||0),missing:!c.resourceId||!name||name==='Item belum dipilih'};
+  const coeff=Number(c.coeff||0);
+  const waste=Number(c.waste||0);
+  const price=Number(c.price!==undefined&&c.price!==null?c.price:(item?.price||0));
+  const qty=Number(line.volume||0)*coeff*(1+waste/100);
+  const subtotal=Math.round(qty*price);
+  return {type:c.type||'Lainnya',name,spec,unit,price,subtotal,qty,coeff,waste,missing:!c.resourceId||!name||name==='Item belum dipilih'};
  });
 }
 function cpQty(n){return Number(n||0).toLocaleString('id-ID',{maximumFractionDigits:4})}
@@ -506,12 +510,16 @@ function cpDetailBody(r){
   let sections=groups.map(type=>{
    const list=items.filter(x=>x.type===type);
    if(!list.length)return '';
-   return `<div class="cp-subhead">${cpGroupLabel(type)}</div><table class="cp-detail-table"><thead><tr><th style="width:28px">No.</th><th>Nama item</th><th>Spesifikasi</th><th>Satuan</th><th class="num">Kebutuhan</th></tr></thead><tbody>${list.map((x,j)=>`<tr><td>${j+1}</td><td>${esc(x.name)}${x.missing?'<div class="cp-warning">Item katalog belum dipilih</div>':''}</td><td>${esc(x.spec||'-')}</td><td>${esc(x.unit)}</td><td class="num">${x.coeff>0?cpQty(x.qty):'<span class="cp-warning">Koefisien belum diisi</span>'}</td></tr>`).join('')}</tbody></table>`;
+   const grpSum=list.reduce((sum,item)=>sum+item.subtotal,0);
+   return `<div class="cp-subhead">${cpGroupLabel(type)}</div><table class="cp-detail-table"><thead><tr><th style="width:28px">No.</th><th>Nama item</th><th>Spesifikasi</th><th style="width:48px">Satuan</th><th class="num" style="width:70px">Kebutuhan</th><th class="num" style="width:95px">Harga satuan</th><th class="num" style="width:105px">Subtotal</th></tr></thead><tbody>${list.map((x,j)=>`<tr><td>${j+1}</td><td>${esc(x.name)}${x.missing?'<div class="cp-warning">Item katalog belum dipilih</div>':''}</td><td>${esc(x.spec||'-')}</td><td>${esc(x.unit)}</td><td class="num">${x.coeff>0?cpQty(x.qty):'<span class="cp-warning">Koefisien belum diisi</span>'}</td><td class="num">${money(x.price)}</td><td class="num"><b>${money(x.subtotal)}</b></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="6" style="text-align:right;font-weight:600;padding-right:8px">Subtotal ${esc(cpGroupLabel(type))}:</td><td class="num" style="font-weight:700">${money(grpSum)}</td></tr></tfoot></table>`;
   }).join('');
   const other=items.filter(x=>!groups.includes(x.type));
-  if(other.length)sections+=`<div class="cp-subhead">Komponen lainnya</div><table class="cp-detail-table"><thead><tr><th>Nama item</th><th>Jenis</th><th>Spesifikasi</th><th>Satuan</th><th class="num">Kebutuhan</th></tr></thead><tbody>${other.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${esc(x.spec||'-')}</td><td>${esc(x.unit)}</td><td class="num">${x.coeff>0?cpQty(x.qty):'<span class="cp-warning">Koefisien belum diisi</span>'}</td></tr>`).join('')}</tbody></table>`;
+  if(other.length){
+   const otherSum=other.reduce((sum,item)=>sum+item.subtotal,0);
+   sections+=`<div class="cp-subhead">Komponen lainnya</div><table class="cp-detail-table"><thead><tr><th style="width:28px">No.</th><th>Nama item</th><th>Jenis</th><th>Spesifikasi</th><th style="width:48px">Satuan</th><th class="num" style="width:70px">Kebutuhan</th><th class="num" style="width:95px">Harga satuan</th><th class="num" style="width:105px">Subtotal</th></tr></thead><tbody>${other.map((x,j)=>`<tr><td>${j+1}</td><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${esc(x.spec||'-')}</td><td>${esc(x.unit)}</td><td class="num">${x.coeff>0?cpQty(x.qty):'<span class="cp-warning">Koefisien belum diisi</span>'}</td><td class="num">${money(x.price)}</td><td class="num"><b>${money(x.subtotal)}</b></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="7" style="text-align:right;font-weight:600;padding-right:8px">Subtotal Lainnya:</td><td class="num" style="font-weight:700">${money(otherSum)}</td></tr></tfoot></table>`;
+  }
   if(!items.length)sections='<p class="cp-muted">Belum ada rincian komponen AHSP untuk pekerjaan ini.</p>';
-  html+=`<section class="cp-work"><div class="cp-work-head"><div><b>${i+1}. ${esc(l.name)}</b><div class="cp-muted">Volume pekerjaan: ${cpQty(l.volume)} ${esc(l.unit||'')}</div></div><div class="cp-work-value">${money(lineTotal(l,r))}</div></div>${sections}</section>`;
+  html+=`<section class="cp-work"><div class="cp-work-head"><div><b>${i+1}. ${esc(l.name)}</b><div class="cp-muted">Volume: ${cpQty(l.volume)} ${esc(l.unit||'')} · Harga Satuan: ${money(unitCost(l,r))}</div></div><div class="cp-work-value">${money(lineTotal(l,r))}</div></div>${sections}</section>`;
  });
  return html;
 }
@@ -519,8 +527,11 @@ function cpRecapData(r){
  const map=new Map();
  r.lines.forEach(l=>cpComponentData(l).forEach(x=>{
   const key=[x.type,x.name,x.spec,x.unit].join('|');
-  if(!map.has(key))map.set(key,{...x,qty:0,usedIn:[]});
-  const row=map.get(key);row.qty+=x.qty;row.usedIn.push(l.name);
+  if(!map.has(key))map.set(key,{...x,qty:0,subtotal:0,usedIn:[]});
+  const row=map.get(key);
+  row.qty+=x.qty;
+  row.subtotal+=x.subtotal;
+  row.usedIn.push(l.name);
  }));
  return [...map.values()].sort((a,b)=>a.type.localeCompare(b.type,'id')||a.name.localeCompare(b.name,'id'));
 }
@@ -530,7 +541,8 @@ function cpRecapBody(r){
  const groups=[...new Set(rows.map(x=>x.type))];
  return groups.map(type=>{
   const list=rows.filter(x=>x.type===type);
-  return `<section class="cp-work"><div class="cp-subhead">${esc(cpGroupLabel(type))}</div><table class="cp-detail-table"><thead><tr><th style="width:28px">No.</th><th>Nama item</th><th>Spesifikasi</th><th>Satuan</th><th class="num">Total kebutuhan</th></tr></thead><tbody>${list.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}${x.missing?'<div class="cp-warning">Item katalog belum dipilih</div>':''}</td><td>${esc(x.spec||'-')}</td><td>${esc(x.unit)}</td><td class="num">${x.coeff>0?cpQty(x.qty):'<span class="cp-warning">Koefisien belum diisi</span>'}</td></tr>`).join('')}</tbody></table></section>`;
+  const grpSum=list.reduce((sum,item)=>sum+item.subtotal,0);
+  return `<section class="cp-work"><div class="cp-subhead">${esc(cpGroupLabel(type))}</div><table class="cp-detail-table"><thead><tr><th style="width:28px">No.</th><th>Nama item</th><th>Spesifikasi</th><th style="width:48px">Satuan</th><th class="num" style="width:80px">Total kebutuhan</th><th class="num" style="width:95px">Harga satuan</th><th class="num" style="width:105px">Total estimasi</th></tr></thead><tbody>${list.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}${x.missing?'<div class="cp-warning">Item katalog belum dipilih</div>':''}</td><td>${esc(x.spec||'-')}</td><td>${esc(x.unit)}</td><td class="num">${x.coeff>0?cpQty(x.qty):'<span class="cp-warning">Koefisien belum diisi</span>'}</td><td class="num">${money(x.price)}</td><td class="num"><b>${money(x.subtotal)}</b></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="6" style="text-align:right;font-weight:600;padding-right:8px">Total ${esc(cpGroupLabel(type))}:</td><td class="num" style="font-weight:700">${money(grpSum)}</td></tr></tfoot></table></section>`;
  }).join('');
 }
 function cpSignature(p,dateText,company){
