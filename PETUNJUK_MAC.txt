@@ -1,0 +1,16 @@
+RAB MANAGEMENT SYSTEM v3.2 — FULL OFFLINE INDONESIA
+
+MASTER WILAYAH TERTANAM
+38 provinsi, 514 kabupaten/kota, 7.285 kecamatan, 83.762 desa/kelurahan (91.599 entri).
+Data berasal dari empat CSV yang diunggah pengguna dan relasi parent-child telah diperiksa.
+
+LOKASI
+- Cari kabupaten/kota; provinsi otomatis terisi.
+- Cari kecamatan setelah kabupaten/kota dipilih.
+- Cari desa/kelurahan setelah kecamatan dipilih.
+- Alamat jalan/nomor dapat diketik manual.
+- Edit proyek dapat mengubah nama dan lokasi.
+
+OFFLINE
+Database wilayah tertanam dalam HTML. Pencarian tidak menggunakan API, fetch, server, atau internet.
+Buka file HTML langsung.
